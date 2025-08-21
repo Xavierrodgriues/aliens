@@ -321,6 +321,106 @@
             });
         })();
     </script>
+<!-- Sharp Triangle Ribbons -->
+<canvas id="ribbonCanvas"></canvas>
+<script>
+const canvas = document.getElementById("ribbonCanvas");
+const ctx = canvas.getContext("2d");
+canvas.width = window.innerWidth;
+canvas.height = window.innerHeight;
+canvas.style.position = "absolute";
+canvas.style.top = 0;
+canvas.style.left = 0;
+canvas.style.zIndex = 5;
+canvas.style.pointerEvents = "none";
+
+let mouse = { x: canvas.width/2, y: canvas.height/2 };
+document.addEventListener("mousemove", e => {
+    mouse.x = e.clientX;
+    mouse.y = e.clientY;
+});
+
+class Ribbon {
+    constructor(x, y) {
+        this.points = [{x, y}];
+        this.maxPoints = 20;
+        this.width = Math.random() * 20 + 10;
+        this.color = `black`;
+    }
+
+    update(targetX, targetY) {
+        const last = this.points[this.points.length-1];
+        const dx = (targetX - last.x) * 0.15;
+        const dy = (targetY - last.y) * 0.15;
+        const newPoint = { x: last.x + dx, y: last.y + dy };
+        this.points.push(newPoint);
+        if(this.points.length > this.maxPoints) this.points.shift();
+    }
+
+    draw(ctx) {
+        if(this.points.length < 2) return;
+
+        ctx.beginPath();
+        for(let i=0; i<this.points.length-1; i++){
+            const p0 = this.points[i];
+            const p1 = this.points[i+1];
+
+            const angle = Math.atan2(p1.y - p0.y, p1.x - p0.x) + Math.PI/2;
+            const offset = this.width * (1 - i/this.points.length);
+
+            const x0 = p0.x + Math.cos(angle)*offset;
+            const y0 = p0.y + Math.sin(angle)*offset;
+            const x1 = p1.x + Math.cos(angle)*offset;
+            const y1 = p1.y + Math.sin(angle)*offset;
+
+            if(i===0) ctx.moveTo(x0, y0);
+            ctx.lineTo(x1, y1);
+        }
+
+        // Close the shape on the other side for a triangle look
+        for(let i=this.points.length-1; i>0; i--){
+            const p0 = this.points[i];
+            const p1 = this.points[i-1];
+
+            const angle = Math.atan2(p1.y - p0.y, p1.x - p0.x) - Math.PI/2;
+            const offset = this.width * (1 - i/this.points.length);
+
+            const x0 = p0.x + Math.cos(angle)*offset;
+            const y0 = p0.y + Math.sin(angle)*offset;
+            const x1 = p1.x + Math.cos(angle)*offset;
+            const y1 = p1.y + Math.sin(angle)*offset;
+
+            ctx.lineTo(x0, y0);
+        }
+
+        ctx.closePath();
+        ctx.fillStyle = this.color;
+        ctx.fill();
+    }
+}
+
+const ribbons = [];
+const maxRibbons = 20;
+for(let i=0; i<maxRibbons; i++){
+    ribbons.push(new Ribbon(mouse.x, mouse.y));
+}
+
+function animate() {
+    ctx.clearRect(0,0,canvas.width,canvas.height);
+    ribbons.forEach(r => {
+        r.update(mouse.x, mouse.y);
+        r.draw(ctx);
+    });
+    requestAnimationFrame(animate);
+}
+animate();
+
+window.addEventListener('resize', () => {
+    canvas.width = window.innerWidth;
+    canvas.height = window.innerHeight;
+});
+</script>
+
 </body>
 
 </html>
