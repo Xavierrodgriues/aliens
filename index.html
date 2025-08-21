@@ -2,88 +2,217 @@
 <html lang="en">
 
 <head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Green Fog Blob with Parallax</title>
-  <style>
-    html,
-    body {
-      height: 100%;
-      margin: 0;
-      background: transparent;
-      overflow: hidden;
-    }
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Green Fog Blob with Parallax</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Funnel+Sans:ital,wght@0,300..800;1,300..800&display=swap"
+        rel="stylesheet">
 
-    canvas {
-      display: block;
-    }
+<link href="https://fonts.googleapis.com/css2?family=Arimo:ital,wght@0,400..700;1,400..700&family=Funnel+Sans:ital,wght@0,300..800;1,300..800&display=swap" rel="stylesheet">
+    <style>
+        html,
+        body {
+            height: 100%;
+            margin: 0;
+            background: transparent;
+            overflow: hidden;
+        }
 
-    /* Image container: vertical column in center */
-    #image {
-      position: absolute;
-      top: 0;
-      left: 50%;
-      transform: translateX(-50%);
-      display: flex;
-      flex-direction: column;
-      justify-content: center;
-      align-items: center;
-      height: 100%;
-      gap: 2rem; /* base spacing */
-      pointer-events: none;
-    }
+        canvas {
+            display: block;
+        }
 
-    /* Images in vertical trail */
-    #image img {
-      width: 12rem;
-      height: 15rem;
-      object-fit: cover;
-      transition: transform 0.3s ease;
-      /* Add random overlap look */
-      margin-top: -9rem; 
-    }
+        /* Image container: vertical column in center */
+        #image {
+            position: absolute;
+            top: 0;
+            left: 50%;
+            transform: translateX(-50%);
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            height: 100%;
+            gap: 7rem;
+            /* base spacing */
+            pointer-events: none;
+        }
 
-    /* Add some organic randomness using nth-child */
-    #image img:nth-child(1) {
-      transform: rotate(-4deg) translateX(-10px);
-      z-index: 2;
-    }
-    #image img:nth-child(2) {
-      transform: rotate(3deg) translateX(15px);
-      z-index: 3;
-      margin-top: -3rem;
-    }
-    #image img:nth-child(3) {
-      transform: rotate(-6deg) translateX(-20px);
-      z-index: 4;
-    }
-    #image img:nth-child(4) {
-      transform: rotate(2deg) translateX(10px);
-      z-index: 1;
-      margin-top: -2rem;
-    }
-  </style>
-  <script src="https://cdn.jsdelivr.net/npm/three@0.155.0/build/three.min.js"></script>
+        /* Images in vertical trail */
+        #image img {
+            width: 12rem;
+            height: 15rem;
+            object-fit: cover;
+            transition: transform 0.3s ease;
+            /* Add random overlap look */
+            margin-top: -9rem;
+        }
+
+        /* Add some organic randomness using nth-child */
+        #img1 {
+            transform: rotate(-4deg) translateX(-10px);
+            z-index: 2;
+        }
+
+        #img2 {
+            transform: rotate(3deg) translateX(15px);
+            z-index: 3;
+            margin-top: -3rem;
+        }
+
+        #img3 {
+            transform: rotate(20deg) translateX(-40px);
+            z-index: 4;
+        }
+
+        #img4 {
+            transform: rotate(2deg) translateX(10px);
+            z-index: 1;
+            margin-top: -2rem;
+        }
+
+        .text-1{
+            /* background: red; */
+            position: absolute;
+            top: 40%;
+            left: 2%;
+        }
+
+        .text-2 h1{
+            font-family: "Funnel Sans";
+            font-weight: 200;
+            font-size: 15rem;
+            letter-spacing: -1.5rem;
+        }
+        .text-2{
+            /* background: red; */
+            position: absolute;
+            top: 40%;
+            right: 2%;
+            letter-spacing: -1rem;
+            font-family: "Arimo";
+            background: linear-gradient(to bottom, #0d200d, #00ff1e); /* dark green → light green */
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text; /* fallback for Firefox */
+            color: transparent; /* ensure gradient shows */
+        }
+
+
+        .text-1 h1{
+            font-family: "Funnel Sans";
+            font-weight: 200;
+            font-size: 15rem;
+            letter-spacing: -1.2rem;
+        }
+
+        .intro{
+            position: absolute;
+            font-family: sans-serif;
+            line-height: 15px;
+            margin-top: 15rem;
+            padding-left: 2rem;
+        }
+
+        video{
+            position: absolute;
+            top: 170%;
+            left: 35%;
+            transform: translate(-50%, -50%);
+            width: 60%;
+            height: 510%;
+            object-fit: cover;
+            z-index: -1;
+        }
+
+        nav{
+            position: absolute;
+            display: flex;
+            font-family: "Funnel Sans";
+            justify-content: space-between;
+            align-items: center;
+            width: 100%;
+            padding: 0rem 2rem;
+        }
+
+        ul{
+            list-style: none;
+            display: flex;
+            gap: 20px;
+            padding-right: 5rem;
+        }
+
+        
+    </style>
+    <script src="https://cdn.jsdelivr.net/npm/three@0.155.0/build/three.min.js"></script>
+    <link rel="stylesheet" href="https://unpkg.com/sheryjs/dist/Shery.css" />
 </head>
 
 <body>
-  <!-- Image trail -->
-  <div id="image">
-    <img src="./img/6b269c46ccec4a9d359175d34bfff978.jpg" alt="">
-    <img src="./img/6f2a33d50e19e656c5d82288ec1b198c.jpg" alt="">
-    <img src="./img/d2953ed9821f77cee650af7ea3c81390.jpg" alt="">
-    <img src="./img/d71b4b2b1dc80746dd83b4d90404d7fd.jpg" alt="">
-  </div>
 
-  <!-- Vertex Shader -->
-  <script id="vert" type="x-shader/x-vertex">
+    <nav>
+        <div>
+            <h3>Aliens</h3>
+        </div>
+        <div>
+            <ul>
+                <li>home</li>
+                <li>why we are special</li>
+                <li>samples</li>
+                <li>book an appointment</li>
+            </ul>
+        </div>
+    </nav>
+    <!-- Image trail -->
+    <div id="image">
+        <img id="img1" src="./img/6b269c46ccec4a9d359175d34bfff978.jpg" alt="">
+        <img id="img2" src="./img/6f2a33d50e19e656c5d82288ec1b198c.jpg" alt="">
+        <img id="img3" src="./img/d2953ed9821f77cee650af7ea3c81390.jpg" alt="">
+        <img id="img4" src="./img/d71b4b2b1dc80746dd83b4d90404d7fd.jpg" alt="">
+    </div>
+
+    <div class="intro">
+        <p>India's most premium tatto studio & some random stuff</p>
+        <p>about us and how <span>aliens Tatto</span> is the one </p>
+        <p>which you should choose.</p>
+
+        <video autoplay muted loop src="./img/Comp 2.mp4"></video>
+    </div>
+
+    
+
+    <div class="text-1">
+        <h1>we're</h1>
+    </div>
+    <div class="text-2">
+        <h1>aliens*</h1>
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/ScrollTrigger.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/0.155.0/three.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/gh/automat/controlkit.js@master/bin/controlKit.min.js"></script>
+    <script type="text/javascript" src="https://unpkg.com/sheryjs/dist/Shery.js"></script>
+
+    <script>
+        Shery.imageEffect("img", {
+            style: 6,
+
+        });
+
+    </script>
+
+    <!-- Vertex Shader -->
+    <script id="vert" type="x-shader/x-vertex">
     void main() {
       gl_Position = vec4(position, 1.0);
     }
   </script>
 
-  <!-- Fragment Shader -->
-  <script id="frag" type="x-shader/x-fragment">
+    <!-- Fragment Shader -->
+    <script id="frag" type="x-shader/x-fragment">
     precision highp float;
 
     uniform float u_time;
@@ -131,7 +260,7 @@
       float t = u_time*0.05;
 
       uv += u_mouse * 0.010;
-      uv.x *= 0.5;
+      uv.x *= 0.6;
 
       float d = length(uv*vec2(1.1,1.0));
       float edge = fbm(uv*3.0 + t);
@@ -147,50 +276,51 @@
     }
   </script>
 
-  <!-- Three.js + Shader Logic -->
-  <script>
-    (() => {
-      const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
-      renderer.setSize(innerWidth, innerHeight);
-      renderer.setClearColor(0x000000, 0);
-      document.body.appendChild(renderer.domElement);
+    <!-- Three.js + Shader Logic -->
+    <script>
+        (() => {
+            const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
+            renderer.setSize(innerWidth, innerHeight);
+            renderer.setClearColor(0x000000, 0);
+            document.body.appendChild(renderer.domElement);
 
-      const scene = new THREE.Scene();
-      const camera = new THREE.Camera();
+            const scene = new THREE.Scene();
+            const camera = new THREE.Camera();
 
-      const uniforms = {
-        u_time: { value: 0 },
-        u_res: { value: new THREE.Vector2(innerWidth, innerHeight) },
-        u_mouse: { value: new THREE.Vector2(0.0, 0.0) }
-      };
+            const uniforms = {
+                u_time: { value: 0 },
+                u_res: { value: new THREE.Vector2(innerWidth, innerHeight) },
+                u_mouse: { value: new THREE.Vector2(0.0, 0.0) }
+            };
 
-      const mat = new THREE.ShaderMaterial({
-        uniforms,
-        vertexShader: document.getElementById("vert").textContent,
-        fragmentShader: document.getElementById("frag").textContent,
-        transparent: true
-      });
+            const mat = new THREE.ShaderMaterial({
+                uniforms,
+                vertexShader: document.getElementById("vert").textContent,
+                fragmentShader: document.getElementById("frag").textContent,
+                transparent: true
+            });
 
-      scene.add(new THREE.Mesh(new THREE.PlaneGeometry(2, 2), mat));
+            scene.add(new THREE.Mesh(new THREE.PlaneGeometry(2, 2), mat));
 
-      let start = performance.now();
-      function animate(now) {
-        uniforms.u_time.value = (now - start) * 0.001;
-        renderer.render(scene, camera);
-        requestAnimationFrame(animate);
-      }
-      animate();
+            let start = performance.now();
+            function animate(now) {
+                uniforms.u_time.value = (now - start) * 0.001;
+                renderer.render(scene, camera);
+                requestAnimationFrame(animate);
+            }
+            animate();
 
-      addEventListener("resize", () => {
-        renderer.setSize(innerWidth, innerHeight);
-        uniforms.u_res.value.set(innerWidth, innerHeight);
-      });
+            addEventListener("resize", () => {
+                renderer.setSize(innerWidth, innerHeight);
+                uniforms.u_res.value.set(innerWidth, innerHeight);
+            });
 
-      document.addEventListener("mousemove", (e) => {
-        uniforms.u_mouse.value.x = (e.clientX / innerWidth - 0.5);
-        uniforms.u_mouse.value.y = -(e.clientY / innerHeight - 0.5);
-      });
-    })();
-  </script>
+            document.addEventListener("mousemove", (e) => {
+                uniforms.u_mouse.value.x = (e.clientX / innerWidth - 0.5);
+                uniforms.u_mouse.value.y = -(e.clientY / innerHeight - 0.5);
+            });
+        })();
+    </script>
 </body>
+
 </html>
