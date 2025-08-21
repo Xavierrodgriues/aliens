@@ -2,60 +2,98 @@
 <html lang="en">
 
 <head>
-    <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>Green Fog Blob with Parallax</title>
-    <style>
-        html,
-        body {
-            height: 100%;
-            margin: 0;
-            background: transparent;
-            overflow: hidden;
-        }
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Green Fog Blob with Parallax</title>
+  <style>
+    html,
+    body {
+      height: 100%;
+      margin: 0;
+      background: transparent;
+      overflow: hidden;
+    }
 
-        canvas {
-            display: block;
-        }
+    canvas {
+      display: block;
+    }
 
-        #image{
-            position: absolute;
-            width: 100%;
-            height: 100%;
-        }
+    /* Image container: vertical column in center */
+    #image {
+      position: absolute;
+      top: 0;
+      left: 50%;
+      transform: translateX(-50%);
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      height: 100%;
+      gap: 2rem; /* base spacing */
+      pointer-events: none;
+      filter: url(#gooey);
+    }
 
-        img{
-            width: 12rem;
-            height: 15rem;
-        }
+    
 
-    </style>
-    <script src="https://cdn.jsdelivr.net/npm/three@0.155.0/build/three.min.js"></script>
+
+    /* Images in vertical trail */
+    #image img {
+      width: 12rem;
+      height: 15rem;
+      object-fit: cover;
+      transition: transform 0.3s ease;
+      /* Add random overlap look */
+      margin-top: -9rem; 
+    }
+
+    /* Add some organic randomness using nth-child */
+    #image img:nth-child(1) {
+      transform: rotate(-4deg) translateX(-10px);
+      z-index: 2;
+    }
+    #image img:nth-child(2) {
+      transform: rotate(3deg) translateX(15px);
+      z-index: 3;
+      margin-top: -3rem;
+    }
+    #image img:nth-child(3) {
+      transform: rotate(-6deg) translateX(-20px);
+      z-index: 4;
+    }
+    #image img:nth-child(4) {
+      transform: rotate(2deg) translateX(10px);
+      z-index: 1;
+      margin-top: -2rem;
+    }
+  </style>
+  <script src="https://cdn.jsdelivr.net/npm/three@0.155.0/build/three.min.js"></script>
 </head>
 
 <body>
+  <!-- Image trail -->
+  <div id="image">
+    <img src="./img/6b269c46ccec4a9d359175d34bfff978.jpg" alt="">
+    <img src="./img/6f2a33d50e19e656c5d82288ec1b198c.jpg" alt="">
+    <img src="./img/d2953ed9821f77cee650af7ea3c81390.jpg" alt="">
+    <img src="./img/d71b4b2b1dc80746dd83b4d90404d7fd.jpg" alt="">
+  </div>
 
-    <div id="image">
-
-        <img src="./img/6b269c46ccec4a9d359175d34bfff978.jpg" alt="">
-        <img src="./img//6f2a33d50e19e656c5d82288ec1b198c.jpg" alt="">
-        <img src="./img/d2953ed9821f77cee650af7ea3c81390.jpg" alt="">
-        <img src="./img/d71b4b2b1dc80746dd83b4d90404d7fd.jpg" alt="">
-    </div>
-    <script id="vert" type="x-shader/x-vertex">
+  <!-- Vertex Shader -->
+  <script id="vert" type="x-shader/x-vertex">
     void main() {
       gl_Position = vec4(position, 1.0);
     }
   </script>
 
-    <script id="frag" type="x-shader/x-fragment">
+  <!-- Fragment Shader -->
+  <script id="frag" type="x-shader/x-fragment">
     precision highp float;
 
     uniform float u_time;
     uniform vec2  u_res;
     uniform vec2  u_mouse;
 
-    // Simplex noise helpers
     vec3 mod289(vec3 x){return x - floor(x * (1.0/289.0)) * 289.0;}
     vec2 mod289(vec2 x){return x - floor(x * (1.0/289.0)) * 289.0;}
     vec3 permute(vec3 x){return mod289(((x*34.0)+1.0)*x);}
@@ -82,7 +120,6 @@
       return 130.0*dot(m,g);
     }
 
-    // Fractal noise
     float fbm(vec2 p){
       float f = 0.0, a = 0.5;
       for(int i=0;i<5;i++){
@@ -94,89 +131,85 @@
     }
 
     void main(){
-          vec2 uv = (gl_FragCoord.xy - 0.5*u_res) / u_res.y;
-          float t = u_time*0.05;
+      vec2 uv = (gl_FragCoord.xy - 0.5*u_res) / u_res.y;
+      float t = u_time*0.05;
 
-          // --- Parallax effect ---
-          uv += u_mouse * 0.010; // scale controls strength of shift
+      uv += u_mouse * 0.010;
+      uv.x *= 0.5;
 
-          // Make the fog wider (stretch on X axis)
-          uv.x *= 0.7;
+      float d = length(uv*vec2(1.1,1.0));
+      float edge = fbm(uv*3.0 + t);
+      float mask = smoothstep(0.55, 0.25, d + edge*0.25);
 
-          // Distance from center (for radial glow)
-          float d = length(uv*vec2(1.1,1.0));
+      vec3 green = vec3(0.4, 0.9, 0.5);
+      float intensity = 0.8 + 0.5 * fbm(uv*2.5 + t*0.5);
+      vec3 color = green * intensity;
 
-          // Noise to fray the edges
-          float edge = fbm(uv*3.0 + t);
+      color = mix(color, vec3(1.0), 0.15 * (1.0 - d));
 
-          // Radial mask with noisy edge
-          float mask = smoothstep(0.55, 0.25, d + edge*0.25);
-
-    // Brighter, softer green base
-    vec3 green = vec3(0.4, 0.9, 0.5);  
-
-    // Add variation with noise (slightly stronger brightness)
-    float intensity = 0.8 + 0.5 * fbm(uv*2.5 + t*0.5);
-
-    vec3 color = green * intensity;
-
-    // Slight glow effect by mixing in white near center
-    color = mix(color, vec3(1.0), 0.15 * (1.0 - d));
-
-
-            gl_FragColor = vec4(color, mask);
-
+      gl_FragColor = vec4(color, mask);
     }
   </script>
 
-    <script>
-        (() => {
-            const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
-            renderer.setSize(innerWidth, innerHeight);
-            renderer.setClearColor(0x000000, 0);
-            document.body.appendChild(renderer.domElement);
+  <!-- Three.js + Shader Logic -->
+  <script>
+    (() => {
+      const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
+      renderer.setSize(innerWidth, innerHeight);
+      renderer.setClearColor(0x000000, 0);
+      document.body.appendChild(renderer.domElement);
 
-            const scene = new THREE.Scene();
-            const camera = new THREE.Camera();
+      const scene = new THREE.Scene();
+      const camera = new THREE.Camera();
 
-            const uniforms = {
-                u_time: { value: 0 },
-                u_res: { value: new THREE.Vector2(innerWidth, innerHeight) },
-                u_mouse: { value: new THREE.Vector2(0.0, 0.0) }
-            };
+      const uniforms = {
+        u_time: { value: 0 },
+        u_res: { value: new THREE.Vector2(innerWidth, innerHeight) },
+        u_mouse: { value: new THREE.Vector2(0.0, 0.0) }
+      };
 
-            const mat = new THREE.ShaderMaterial({
-                uniforms,
-                vertexShader: document.getElementById("vert").textContent,
-                fragmentShader: document.getElementById("frag").textContent,
-                transparent: true
-            });
+      const mat = new THREE.ShaderMaterial({
+        uniforms,
+        vertexShader: document.getElementById("vert").textContent,
+        fragmentShader: document.getElementById("frag").textContent,
+        transparent: true
+      });
 
-            scene.add(new THREE.Mesh(new THREE.PlaneGeometry(2, 2), mat));
+      scene.add(new THREE.Mesh(new THREE.PlaneGeometry(2, 2), mat));
 
-            // Animate
-            let start = performance.now();
-            function animate(now) {
-                uniforms.u_time.value = (now - start) * 0.001;
-                renderer.render(scene, camera);
-                requestAnimationFrame(animate);
-            }
-            animate();
+      let start = performance.now();
+      function animate(now) {
+        uniforms.u_time.value = (now - start) * 0.001;
+        renderer.render(scene, camera);
+        requestAnimationFrame(animate);
+      }
+      animate();
 
-            // Resize
-            addEventListener("resize", () => {
-                renderer.setSize(innerWidth, innerHeight);
-                uniforms.u_res.value.set(innerWidth, innerHeight);
-            });
+      addEventListener("resize", () => {
+        renderer.setSize(innerWidth, innerHeight);
+        uniforms.u_res.value.set(innerWidth, innerHeight);
+      });
 
-            // Mouse move listener
-            document.addEventListener("mousemove", (e) => {
-                // Normalize mouse position (-0.5 to 0.5)
-                uniforms.u_mouse.value.x = (e.clientX / innerWidth - 0.5);
-                uniforms.u_mouse.value.y = -(e.clientY / innerHeight - 0.5); // invert Y for natural feel
-            });
-        })();
-    </script>
+      document.addEventListener("mousemove", (e) => {
+        uniforms.u_mouse.value.x = (e.clientX / innerWidth - 0.5);
+        uniforms.u_mouse.value.y = -(e.clientY / innerHeight - 0.5);
+      });
+    })();
+  </script>
+
+
+
+<svg width="0" height="0">
+  <filter id="gooey">
+    <feGaussianBlur in="SourceGraphic" stdDeviation="15" result="blur" />
+    <feColorMatrix in="blur" mode="matrix"
+      values="1 0 0 0 0
+              0 1 0 0 0
+              0 0 1 0 0
+              0 0 0 25 -10" result="gooey" />
+    <feComposite in="SourceGraphic" in2="gooey" operator="atop"/>
+  </filter>
+</svg>
+
 </body>
-
 </html>
